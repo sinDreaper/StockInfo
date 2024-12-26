@@ -8,21 +8,35 @@ package com.StockIs.model;
  *
  * @author prashantrijal
  */
-public class StockIs {
-    private int StockId;
+public class stockModel {
+    private String stockId;
     private String Name;
     private String Type;
     private String ListingDate;
     private int TotalShares;
-    private int OpenPrice;
-    private int ClosePrice;
-
-    public int getStockId() {
-        return StockId;
+    private double OpenPrice;
+    private double ClosePrice;
+    
+    public stockModel(){
+        
+    }
+    
+    public stockModel(String stockId, String Name, String Type, String ListingDate, int TotalShares,double OpenPrice, double CLosePrice) {
+        this.stockId = stockId;
+        this.Name = Name;
+        this.Type = Type;
+        this.ListingDate = ListingDate;
+        this.TotalShares = TotalShares;
+        this.OpenPrice = OpenPrice;
+        this.ClosePrice = CLosePrice;
     }
 
-    public void setStockId(int StockId) {
-        this.StockId = StockId;
+    public String getStockId() {
+        return stockId;
+    }
+
+    public void setStockId(String stockId) {
+        this.stockId = stockId;
     }
 
     public String getName() {
@@ -57,20 +71,23 @@ public class StockIs {
         this.TotalShares = TotalShares;
     }
 
-    public int getOpenPrice() {
+    public double getOpenPrice() {
         return OpenPrice;
     }
 
-    public void setOpenPrice(int OpenPrice) {
+    public void setOpenPrice(double OpenPrice) {
         this.OpenPrice = OpenPrice;
     }
 
-    public int getClosePrice() {
+    public double getClosePrice() {
         return ClosePrice;
     }
 
-    public void setClosePrice(int ClosePrice) {
+    public void setClosePrice(double ClosePrice) {
         this.ClosePrice = ClosePrice;
     }
+
+
+    
     
 }
