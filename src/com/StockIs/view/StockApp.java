@@ -5,58 +5,82 @@
 package com.StockIs.view;
 
 import com.StockIs.controller.ValidationUtil;
+import com.StockIs.controller.algorithm.ClosePriceSorter;
+import com.StockIs.controller.algorithm.OpenPriceSorter;
+import com.StockIs.controller.algorithm.SortDate;
+import com.StockIs.controller.algorithm.SortStockId;
 import com.StockIs.model.stockModel;
 import java.util.LinkedList;
 import java.util.List;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
-
 /**
  *
- * @author prashantrijal
+ * @author prashantrijal LMU ID 23048683
  */
 public class StockApp extends javax.swing.JFrame {
+
     private List<stockModel> stockList;
     private java.awt.CardLayout cardLayout;
-    private ValidationUtil validator; 
+    private ValidationUtil validator;
+    private SortStockId IDsorter;
+    private SortDate Datesorter;
+    private OpenPriceSorter OpenPricesorter;
+    private ClosePriceSorter ClosePricesorter;
 
     /**
      * Creates new form StockIs
      */
     public StockApp() {
+        OpenPricesorter = new OpenPriceSorter();
+        IDsorter = new SortStockId();
+        Datesorter = new SortDate();
+        ClosePricesorter = new ClosePriceSorter();
         initComponents();
         initializeLayout(); //Setup card layout and screens
         initializeData();
     }
-    
-    private void initializeLayout() {
-            cardLayout = new java.awt.CardLayout();
-            getContentPane().setLayout(cardLayout);
 
-            // Add panels with unique identifiers
-            getContentPane().add(LoginPanel,"LoginScreen" );
-            getContentPane().add(HomePanel,"HomeScreen" );
+    private void initializeLayout() {
+
+        cardLayout = new java.awt.CardLayout();
+        getContentPane().setLayout(cardLayout);
+
+        // Add panels with unique identifiers
+        getContentPane().add(LoginPanel, "LoginScreen");
+        getContentPane().add(HomePanel, "HomeScreen");
     }
-    
+
     private void loadScreen(String screenName) {
         cardLayout.show(getContentPane(), screenName);
     }
-    
+
     private void initializeData() {
         stockList = new LinkedList();
-        registerStock(new stockModel("1234", "Suman", "Equity", "2005-12-23", 56789, 234,345));
-        registerStock(new stockModel("12345", "Raman", "Equity", "2005-12-23", 56789, 456,789));
+        registerStock(new stockModel("1234", "Suman", "Equity", "2005-12-23", 56789, 234, 345));
+        registerStock(new stockModel("12345", "Raman", "Equity", "2005-12-23", 56789, 456, 789));
+        registerStock(new stockModel("67890", "Mohan", "Debt", "2010-08-15", 23456, 789, 012));
+        registerStock(new stockModel("54321", "Anjali", "Equity", "2017-03-19", 98765, 123, 456));
+        registerStock(new stockModel("13579", "Kiran", "Mutual Fund", "2023-11-11", 11223, 987, 654));
+        registerStock(new stockModel("24680", "Rajesh", "Equity", "2015-07-30", 44567, 321, 789));
+        registerStock(new stockModel("98765", "Priya", "Debt", "2000-05-21", 55678, 654, 321));
+        registerStock(new stockModel("11223", "Amit", "Equity", "2012-02-28", 99887, 456, 123));
+        registerStock(new stockModel("33445", "Sneha", "Debt", "2003-09-12", 77889, 123, 456));
+        registerStock(new stockModel("55667", "Rahul", "Equity", "2018-01-05", 66554, 789, 456));
+        registerStock(new stockModel("77889", "Nisha", "Mutual Fund", "2021-04-18", 44332, 111, 999));
+        registerStock(new stockModel("99000", "Arjun", "Debt", "2007-12-11", 22110, 222, 888));
     }
-    
+
     private void registerStock(stockModel stock) {
         stockList.add(stock);
         DefaultTableModel model = (DefaultTableModel) TblStock.getModel(); // Create a table model for inputting data in table
         TblStock.setModel(model);
         model.addRow(new Object[]{
-            stock.getStockId(), stock.getName(), stock.getType(),stock.getListingDate(), stock.getTotalShares(), stock.getOpenPrice(), stock.getClosePrice()
+            stock.getStockId(), stock.getName(), stock.getType(), stock.getListingDate(), stock.getTotalShares(), stock.getOpenPrice(), stock.getClosePrice()
         });
     }
+
     private void loadListToTable(List<stockModel> stockList) {
         DefaultTableModel model = (DefaultTableModel) TblStock.getModel();
 
@@ -74,11 +98,13 @@ public class StockApp extends javax.swing.JFrame {
             stock.getClosePrice()
         }));
     }
+
     private boolean checkDuplicateStock(stockModel stock) {
         return stockList.stream()
                 .anyMatch(existingStock
                         -> (existingStock.getStockId() == null ? stock.getStockId() == null : existingStock.getStockId().equals(stock.getStockId())));
     }
+
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -99,6 +125,8 @@ public class StockApp extends javax.swing.JFrame {
         HomePnl = new javax.swing.JPanel();
         jScrollPane4 = new javax.swing.JScrollPane();
         TblStock = new javax.swing.JTable();
+        ComboBox = new javax.swing.JComboBox<>();
+        SearchBox = new javax.swing.JTextField();
         AddPnl = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         TxtCompanyName = new javax.swing.JTextField();
@@ -238,10 +266,7 @@ public class StockApp extends javax.swing.JFrame {
 
         TblStock.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null},
-                {null, null, null, null, null, null, null}
+
             },
             new String [] {
                 "Stock Id", "Company Name", "Type", "Listing Date", "Total Shares", "Open Price", "Close Price"
@@ -249,19 +274,37 @@ public class StockApp extends javax.swing.JFrame {
         ));
         jScrollPane4.setViewportView(TblStock);
 
+        ComboBox.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Ascending ID", "Descending ID", "Highest Open Price", "Lowest Open Price", "Highest Close Price", "Lowest Close Price", "Recent Listing Date", "Old Listing Date" }));
+        ComboBox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ComboBoxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout HomePnlLayout = new javax.swing.GroupLayout(HomePnl);
         HomePnl.setLayout(HomePnlLayout);
         HomePnlLayout.setHorizontalGroup(
             HomePnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(HomePnlLayout.createSequentialGroup()
                 .addGap(47, 47, 47)
-                .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 782, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(91, Short.MAX_VALUE))
+                .addGroup(HomePnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(HomePnlLayout.createSequentialGroup()
+                        .addComponent(SearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, 319, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(ComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(210, 210, 210))
+                    .addGroup(HomePnlLayout.createSequentialGroup()
+                        .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, 782, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(91, Short.MAX_VALUE))))
         );
         HomePnlLayout.setVerticalGroup(
             HomePnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, HomePnlLayout.createSequentialGroup()
-                .addContainerGap(264, Short.MAX_VALUE)
+                .addContainerGap(223, Short.MAX_VALUE)
+                .addGroup(HomePnlLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(SearchBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
                 .addComponent(jScrollPane4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(34, 34, 34))
         );
@@ -636,7 +679,7 @@ public class StockApp extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-    
+
     private void HomeLblMouseCLicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_HomeLblMouseCLicked
         // TODO add your handling code here:
         TabbedPanel.setSelectedIndex(0);
@@ -646,7 +689,7 @@ public class StockApp extends javax.swing.JFrame {
         // TODO add your handling code here:
         TabbedPanel.setSelectedIndex(1);
     }//GEN-LAST:event_AddLblMouseClicked
- 
+
     private void UpdateLblMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UpdateLblMouseClicked
         // TODO add your handling code here:
         TabbedPanel.setSelectedIndex(2);
@@ -654,311 +697,287 @@ public class StockApp extends javax.swing.JFrame {
 
     private void DeleteLblMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_DeleteLblMouseClicked
         String response;
-        
+
         response = JOptionPane.showInputDialog("Stock Id");
-        
+
         String StockId = response;
-        
-       
-        
+
         for (int i = 0; i < stockList.size(); i++) {
             stockModel existingStock = stockList.get(i);
             if (existingStock.getStockId().equals(StockId)) {
                 int dialogButton = JOptionPane.YES_NO_OPTION;
-                stockModel result =stockList.get(i);
-                JOptionPane.showConfirmDialog(null,"Would you like to remove"+response+"\n","Warning",dialogButton);
-                
-                if(dialogButton == JOptionPane.YES_OPTION){
-                    
+                stockModel result = stockList.get(i);
+                JOptionPane.showConfirmDialog(null, "Would you like to remove" + response + "\n", "Warning", dialogButton);
+
+                if (dialogButton == JOptionPane.YES_OPTION) {
+
                     stockList.remove(i);
                     loadListToTable(stockList);
-                    JOptionPane.showMessageDialog(null,"Stock removed");
-                    
+                    JOptionPane.showMessageDialog(null, "Stock removed");
+
+                } else {
+                    JOptionPane.showMessageDialog(null, "Stock not removed");
                 }
-                else{
-                    JOptionPane.showMessageDialog(null,"Stock not removed");
-                }
-                
+
                 break;
             }
-         }
-        
-        
+        }
+
+
     }//GEN-LAST:event_DeleteLblMouseClicked
-
+    
     private void AddBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_AddBtnActionPerformed
-    try {
-    // Retrieving and validating inputs
-    if( TxtStockId.getText().isEmpty() ||
-        TxtCompanyName.getText().isEmpty() ||
-        TxtType.getText().isEmpty() ||
-        TxtListingDate.getText().isEmpty() ||
-        TxtTotalShares.getText().isEmpty() ||
-        TxtOpenPrice.getText().isEmpty() ||
-        TxtClosePrice.getText().isEmpty())
-        
-    {
-        throw new NullPointerException("Fill all the values");
-    }
-    
-    if (!validator.validateStockId(TxtStockId.getText().trim())) 
-    {
-        
-        throw new IllegalArgumentException("Invalid Stock ID. It must be at least 4 digits.");
-    }
+        try {
+            // Retrieving and validating inputs
+            if (TxtStockId.getText().isEmpty()
+                    || TxtCompanyName.getText().isEmpty()
+                    || TxtType.getText().isEmpty()
+                    || TxtListingDate.getText().isEmpty()
+                    || TxtTotalShares.getText().isEmpty()
+                    || TxtOpenPrice.getText().isEmpty()
+                    || TxtClosePrice.getText().isEmpty()) {
+                throw new NullPointerException("Fill all the values");
+            }
 
-    
-    if (!validator.validateName(TxtCompanyName.getText().trim())) 
-    {
-        throw new IllegalArgumentException("Invalid Company Name. It must contain only alphabets.");
-    }
- 
-    
-    if (!validator.validateType(TxtType.getText().trim())) 
-    {
-        throw new IllegalArgumentException("Invalid Type. Allowed values are: Equity, Ordinary, Preference, Deferred, Non-voting.");
-    }
+            if (!validator.validateStockId(TxtStockId.getText().trim())) {
 
-   
-    if (!validator.validateListingDate(TxtListingDate.getText().trim())) 
-    {
-        throw new IllegalArgumentException("Invalid Listing Date. Format must be YYYY-MM-DD.");
-    }
+                throw new IllegalArgumentException("Invalid Stock ID. It must be at least 4 digits.");
+            }
 
-   
-    if (!validator.validateTotalShares((TxtTotalShares.getText().trim()))) 
-    {
-        throw new IllegalArgumentException("Invalid Total Shares. It must be a positive integer.");
-    }
+            if (!validator.validateName(TxtCompanyName.getText().trim())) {
+                throw new IllegalArgumentException("Invalid Company Name. It must contain only alphabets.");
+            }
 
-    
-    if (!validator.validateOpenPrice(TxtOpenPrice.getText().trim())) 
-    {
-        throw new IllegalArgumentException("Invalid Open Price. It must be a positive numeric value.");
-    }
+            if (!validator.validateType(TxtType.getText().trim())) {
+                throw new IllegalArgumentException("Invalid Type. Allowed values are: Equity, Ordinary, Preference, Deferred, Non-voting.");
+            }
 
+            if (!validator.validateListingDate(TxtListingDate.getText().trim())) {
+                throw new IllegalArgumentException("Invalid Listing Date. Format must be YYYY-MM-DD.");
+            }
 
-    if (!validator.validateClosePrice(TxtClosePrice.getText().trim())) 
-    {
-        throw new IllegalArgumentException("Invalid Close Price. It must be a positive numeric value.");
-    }
+            if (!validator.validateTotalShares((TxtTotalShares.getText().trim()))) {
+                throw new IllegalArgumentException("Invalid Total Shares. It must be a positive integer.");
+            }
 
-    // If all validations pass, you can proceed with further operations
-        String stockId = TxtStockId.getText().trim();
-        String name = TxtCompanyName.getText().trim();
-        String type = TxtType.getText().trim();
-        String listingDate = TxtListingDate.getText().trim();
-        int totalShares = Integer.parseInt(TxtTotalShares.getText().trim());
-        double openPrice = Double.parseDouble(TxtOpenPrice.getText().trim());
-        double closePrice = Double.parseDouble(TxtClosePrice.getText().trim());
-       
-        
-        stockModel newStock = new stockModel(
-        stockId,
-        name,
-        type,
-        listingDate,
-        totalShares,
-        openPrice,
-        closePrice);
-        
-        if(checkDuplicateStock(newStock)){
-            throw new RepeatingStockIdException ("The Stock id already exists.");
-        }
-        else{
-        stockList.add(newStock);
-        loadListToTable(stockList);
-        
-        TxtStockId.setText("");
-        TxtCompanyName.setText("");
-        TxtType.setText("");
-        TxtListingDate.setText("");
-        TxtTotalShares.setText("");
-        TxtOpenPrice.setText("");
-        TxtClosePrice.setText("");
+            if (!validator.validateOpenPrice(TxtOpenPrice.getText().trim())) {
+                throw new IllegalArgumentException("Invalid Open Price. It must be a positive numeric value.");
+            }
+
+            if (!validator.validateClosePrice(TxtClosePrice.getText().trim())) {
+                throw new IllegalArgumentException("Invalid Close Price. It must be a positive numeric value.");
+            }
+
+            // If all validations pass, you can proceed with further operations
+            String stockId = TxtStockId.getText().trim();
+            String name = TxtCompanyName.getText().trim();
+            String type = TxtType.getText().trim();
+            String listingDate = TxtListingDate.getText().trim();
+            int totalShares = Integer.parseInt(TxtTotalShares.getText().trim());
+            double openPrice = Double.parseDouble(TxtOpenPrice.getText().trim());
+            double closePrice = Double.parseDouble(TxtClosePrice.getText().trim());
+
+            stockModel newStock = new stockModel(
+                    stockId,
+                    name,
+                    type,
+                    listingDate,
+                    totalShares,
+                    openPrice,
+                    closePrice);
+
+            if (checkDuplicateStock(newStock)) {
+                throw new RepeatingStockIdException("The Stock id already exists.");
+            } else {
+                stockList.add(newStock);
+                loadListToTable(stockList);
+
+                TxtStockId.setText("");
+                TxtCompanyName.setText("");
+                TxtType.setText("");
+                TxtListingDate.setText("");
+                TxtTotalShares.setText("");
+                TxtOpenPrice.setText("");
+                TxtClosePrice.setText("");
+            }
+
+        } catch (RepeatingStockIdException e) {
+            JOptionPane.showMessageDialog(this, "The stock id already exists " + e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NullPointerException e) {
+            JOptionPane.showMessageDialog(this, "all fields must be filled " + e.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Input must be a valid number: " + e.getMessage(), "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, "Validation Error: " + e.getMessage(), "Validation Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Unexpected Error: " + e.getMessage(), "Unexpected Error", JOptionPane.ERROR_MESSAGE);
         }
 
-} 
-    catch(RepeatingStockIdException e)
-    {
-         JOptionPane.showMessageDialog(this, "The stock id already exists " + e.getMessage(),"Unexpected Error", JOptionPane.ERROR_MESSAGE);
-    }
-    catch(NullPointerException e)
-    {
-        JOptionPane.showMessageDialog(this, "all fields must be filled " + e.getMessage(),"Input Error", JOptionPane.ERROR_MESSAGE);
-    }
-    catch (NumberFormatException e) 
-    {
-    JOptionPane.showMessageDialog(this, "Input must be a valid number: " + e.getMessage(),"Input Error", JOptionPane.ERROR_MESSAGE);
-    } 
-    catch (IllegalArgumentException e) 
-    {
-    JOptionPane.showMessageDialog(this, "Validation Error: " + e.getMessage(),"Validation Error", JOptionPane.ERROR_MESSAGE);
-    } 
-    catch (Exception e) 
-    {
-    JOptionPane.showMessageDialog(this, "Unexpected Error: " + e.getMessage(),"Unexpected Error", JOptionPane.ERROR_MESSAGE);
-    }
 
-        
     }//GEN-LAST:event_AddBtnActionPerformed
-private static class RepeatingStockIdException extends Exception {
+    private static class RepeatingStockIdException extends Exception {
 
         public RepeatingStockIdException(String the_Stock_id_already_exists) {
         }
     }
     private void UpdateBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_UpdateBtnActionPerformed
         // TODO add your handling code here:
-        try 
-        {
+        try {
             // Retrieving and validating inputs
-            if( StockIdTxt.getText().isEmpty() ||
-                CompanyNameTxt.getText().isEmpty() ||
-                TypeTxt.getText().isEmpty() ||
-                ListingDateTxt.getText().isEmpty() ||
-                TotalSharesTxt.getText().isEmpty() ||
-                OpenPriceTxt.getText().isEmpty() ||
-                ClosePriceTxt.getText().isEmpty())
-
-            {
+            if (StockIdTxt.getText().isEmpty()
+                    || CompanyNameTxt.getText().isEmpty()
+                    || TypeTxt.getText().isEmpty()
+                    || ListingDateTxt.getText().isEmpty()
+                    || TotalSharesTxt.getText().isEmpty()
+                    || OpenPriceTxt.getText().isEmpty()
+                    || ClosePriceTxt.getText().isEmpty()) {
                 throw new NullPointerException("Fill all the values");
             }
 
-            if (!validator.validateStockId(StockIdTxt.getText().trim())) 
-            {
+            if (!validator.validateStockId(StockIdTxt.getText().trim())) {
 
                 throw new IllegalArgumentException("Invalid Stock ID. It must be at least 4 digits.");
             }
 
-
-            if (!validator.validateName(CompanyNameTxt.getText().trim())) 
-            {
+            if (!validator.validateName(CompanyNameTxt.getText().trim())) {
                 throw new IllegalArgumentException("Invalid Company Name. It must contain only alphabets.");
             }
 
-
-            if (!validator.validateType(TypeTxt.getText().trim())) 
-            {
+            if (!validator.validateType(TypeTxt.getText().trim())) {
                 throw new IllegalArgumentException("Invalid Type. Allowed values are: Equity, Ordinary, Preference, Deferred, Non-voting.");
             }
 
-
-            if (!validator.validateListingDate(ListingDateTxt.getText().trim())) 
-            {
+            if (!validator.validateListingDate(ListingDateTxt.getText().trim())) {
                 throw new IllegalArgumentException("Invalid Listing Date. Format must be YYYY-MM-DD.");
             }
 
-
-            if (!validator.validateTotalShares((TotalSharesTxt.getText().trim()))) 
-            {
+            if (!validator.validateTotalShares((TotalSharesTxt.getText().trim()))) {
                 throw new IllegalArgumentException("Invalid Total Shares. It must be a positive integer.");
             }
 
-
-            if (!validator.validateOpenPrice(OpenPriceTxt.getText().trim())) 
-            {
+            if (!validator.validateOpenPrice(OpenPriceTxt.getText().trim())) {
                 throw new IllegalArgumentException("Invalid Open Price. It must be a positive numeric value.");
             }
 
-
-            if (!validator.validateClosePrice(ClosePriceTxt.getText().trim())) 
-            {
+            if (!validator.validateClosePrice(ClosePriceTxt.getText().trim())) {
                 throw new IllegalArgumentException("Invalid Close Price. It must be a positive numeric value.");
             }
 
             // If all validations pass, you can proceed with further operations
-                String stockId = StockIdTxt.getText().trim();
-                String name = CompanyNameTxt.getText().trim();
-                String type = TypeTxt.getText().trim();
-                String listingDate = ListingDateTxt.getText().trim();
-                int totalShares = Integer.parseInt(TotalSharesTxt.getText().trim());
-                double openPrice = Double.parseDouble(OpenPriceTxt.getText().trim());
-                double closePrice = Double.parseDouble(ClosePriceTxt.getText().trim());
+            String stockId = StockIdTxt.getText().trim();
+            String name = CompanyNameTxt.getText().trim();
+            String type = TypeTxt.getText().trim();
+            String listingDate = ListingDateTxt.getText().trim();
+            int totalShares = Integer.parseInt(TotalSharesTxt.getText().trim());
+            double openPrice = Double.parseDouble(OpenPriceTxt.getText().trim());
+            double closePrice = Double.parseDouble(ClosePriceTxt.getText().trim());
 
+            stockModel updatedStock = new stockModel(
+                    stockId,
+                    name,
+                    type,
+                    listingDate,
+                    totalShares,
+                    openPrice,
+                    closePrice);
 
-                stockModel updatedStock = new stockModel(
-                stockId,
-                name,
-                type,
-                listingDate,
-                totalShares,
-                openPrice,
-                closePrice);
-
-               boolean stockUpdated = false;
-                for (int i = 0; i < stockList.size(); i++) {
-                    stockModel existingStock = stockList.get(i);
-                    if (existingStock.getStockId().equals(updatedStock.getStockId())) {
-                        // Update the stock data
-                        stockList.set(i, updatedStock);
-                        stockUpdated = true;
-                        break;
-                    }
-                 }
-                if (!stockUpdated)
-                {
-                    throw new RepeatingStockIdException("The Stock ID does not exist.");
+            boolean stockUpdated = false;
+            for (int i = 0; i < stockList.size(); i++) {
+                stockModel existingStock = stockList.get(i);
+                if (existingStock.getStockId().equals(updatedStock.getStockId())) {
+                    // Update the stock data
+                    stockList.set(i, updatedStock);
+                    stockUpdated = true;
+                    break;
                 }
-                else{
-                    loadListToTable(stockList);
-                    
-                    StockIdTxt.setText("");
-                    CompanyNameTxt.setText("");
-                    TypeTxt.setText("");
-                    ListingDateTxt.setText("");
-                    TotalSharesTxt.setText("");
-                    OpenPriceTxt.setText("");
-                    ClosePriceTxt.setText("");
-                    
-                    JOptionPane.showMessageDialog(null,"The Stock table is updated","Stock Updated",JOptionPane.INFORMATION_MESSAGE);
-                }
-                
-                
+            }
+            if (!stockUpdated) {
+                throw new RepeatingStockIdException("The Stock ID does not exist.");
+            } else {
+                loadListToTable(stockList);
 
-        } 
-    catch(RepeatingStockIdException e)
-    {
-         JOptionPane.showMessageDialog(this, "The stock id dosenot exists " + e.getMessage(),"Unexpected Error", JOptionPane.WARNING_MESSAGE);
-    }
-    catch(NullPointerException e)
-    {
-        JOptionPane.showMessageDialog(this, "all fields must be filled " + e.getMessage(),"Input Error", JOptionPane.WARNING_MESSAGE);
-    }
-    catch (NumberFormatException e) 
-    {
-    JOptionPane.showMessageDialog(this, "Input must be a valid number: " + e.getMessage(),"Input Error", JOptionPane.WARNING_MESSAGE);
-    } 
-    catch (IllegalArgumentException e) 
-    {
-    JOptionPane.showMessageDialog(this, "Validation Error: " + e.getMessage(),"Validation Error", JOptionPane.WARNING_MESSAGE);
-    } 
-    catch (Exception e) 
-    {
-    JOptionPane.showMessageDialog(this, "Unexpected Error: " + e.getMessage(),"Unexpected Error", JOptionPane.WARNING_MESSAGE);
-    }
+                StockIdTxt.setText("");
+                CompanyNameTxt.setText("");
+                TypeTxt.setText("");
+                ListingDateTxt.setText("");
+                TotalSharesTxt.setText("");
+                OpenPriceTxt.setText("");
+                ClosePriceTxt.setText("");
 
-        
+                JOptionPane.showMessageDialog(null, "The Stock table is updated", "Stock Updated", JOptionPane.INFORMATION_MESSAGE);
+            }
+
+        } catch (RepeatingStockIdException e) {
+            JOptionPane.showMessageDialog(this, "The stock id dosenot exists " + e.getMessage(), "Unexpected Error", JOptionPane.WARNING_MESSAGE);
+        } catch (NullPointerException e) {
+            JOptionPane.showMessageDialog(this, "all fields must be filled " + e.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Input must be a valid number: " + e.getMessage(), "Input Error", JOptionPane.WARNING_MESSAGE);
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, "Validation Error: " + e.getMessage(), "Validation Error", JOptionPane.WARNING_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Unexpected Error: " + e.getMessage(), "Unexpected Error", JOptionPane.WARNING_MESSAGE);
+        }
+
+
     }//GEN-LAST:event_UpdateBtnActionPerformed
 
     private void btnLoginActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnLoginActionPerformed
         // TODO add your handling code here:
         // Get the username and password input
-        String username = "admin";//UsernameTxt.getText(); //txtFldLoginUsername.getText();
-        String password = "admin"; //PasswordTxt.getText(); //new String(pwdFldLogin.getPassword());
+        String username = UsernameTxt.getText();//UsernameTxt.getText(); //txtFldLoginUsername.getText();
+        String password = PasswordTxt.getText(); //PasswordTxt.getText(); //new String(pwdFldLogin.getPassword());
 
         // Check if username or password is empty
         if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(null,"Please fill the username and password","Empty fields",JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Please fill the username and password", "Empty fields", JOptionPane.INFORMATION_MESSAGE);
         } // Check if username and password are incorrect
         else if (!username.equals("admin") || !password.equals("admin")) {
             JOptionPane.showMessageDialog(null, "Username or Password dosenot Match", "Invalid Input", JOptionPane.ERROR_MESSAGE);
         } // If credentials are correct, proceed to load the main screen
         else {
-            JOptionPane.showMessageDialog(null,"Succesfully Loged In the System");
+            JOptionPane.showMessageDialog(null, "Succesfully Loged In the System");
             loadScreen("HomeScreen"); // Load the main screen
         }
     }//GEN-LAST:event_btnLoginActionPerformed
-    
+
+    private void ComboBoxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ComboBoxActionPerformed
+        // TODO add your handling code here:
+       String selectedValue = ComboBox.getSelectedItem().toString();
+        if (selectedValue.equals("Ascending ID")) {
+            List<stockModel> sortedAsc = IDsorter.sortByStockId(stockList, false);
+            loadListToTable(sortedAsc);
+        } 
+        else if (selectedValue.equals("Descending ID")) {
+            List<stockModel> sortedDesc = IDsorter.sortByStockId(stockList, true);
+            loadListToTable(sortedDesc);
+        }
+        else if (selectedValue.equals("Recent Listing Date")) {
+            List<stockModel> sortedDateAsc = Datesorter.sortByDate(stockList, true);
+            loadListToTable(sortedDateAsc);
+        }
+         else if (selectedValue.equals("Old Listing Date")) {
+            List<stockModel> sortedDateDesc = Datesorter.sortByDate(stockList, false);
+            loadListToTable(sortedDateDesc);
+        }
+        else if (selectedValue.equals("Highest Open Price")) {
+            List<stockModel> OpenPriceAsc = OpenPricesorter.sortByOpenPrice(stockList, true);
+            loadListToTable(OpenPriceAsc);
+        }
+        else if (selectedValue.equals("Lowest Open Price")) {
+            List<stockModel> OpenPriceDesc = OpenPricesorter.sortByOpenPrice(stockList, false);
+            loadListToTable(OpenPriceDesc);
+        }
+        else if (selectedValue.equals("Highest Close Price")) {
+            List<stockModel> ClosePriceAsc = ClosePricesorter.sortByOpenPrice(stockList, true);
+            loadListToTable(ClosePriceAsc);
+        }
+        else if (selectedValue.equals("Lowest Close Price")) {
+            List<stockModel> ClosePriceDesc = ClosePricesorter.sortByOpenPrice(stockList, false);
+            loadListToTable(ClosePriceDesc);
+        }
+    }//GEN-LAST:event_ComboBoxActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -991,10 +1010,10 @@ private static class RepeatingStockIdException extends Exception {
 
         /* Create and display the form */
         StockApp stock = new StockApp();
-        
+
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
-           stock.setVisible(true);
+            stock.setVisible(true);
         });
     }
 
@@ -1003,6 +1022,7 @@ private static class RepeatingStockIdException extends Exception {
     private javax.swing.JLabel AddLbl;
     private javax.swing.JPanel AddPnl;
     private javax.swing.JTextField ClosePriceTxt;
+    private javax.swing.JComboBox<String> ComboBox;
     private javax.swing.JTextField CompanyNameTxt;
     private javax.swing.JLabel DeleteLbl;
     private javax.swing.JLabel HomeLbl;
@@ -1012,6 +1032,7 @@ private static class RepeatingStockIdException extends Exception {
     private javax.swing.JPanel LoginPanel;
     private javax.swing.JTextField OpenPriceTxt;
     private javax.swing.JTextField PasswordTxt;
+    private javax.swing.JTextField SearchBox;
     private javax.swing.JTextField StockIdTxt;
     private javax.swing.JTabbedPane TabbedPanel;
     private javax.swing.JTable TblStock;
@@ -1061,5 +1082,4 @@ private static class RepeatingStockIdException extends Exception {
     private javax.swing.JTable jTable2;
     // End of variables declaration//GEN-END:variables
 
-    
 }
