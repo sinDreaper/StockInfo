@@ -2,14 +2,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
+/**
+ *
+ * @author prashantrijal
+ * LMU ID 23048683
+ */
+
 package com.StockIs.controller;
 
 import java.util.regex.Pattern;
 
-/**
- *
- * @author prashantrijal
- */
+
 public class ValidationUtil {
 
     private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z]+$");
